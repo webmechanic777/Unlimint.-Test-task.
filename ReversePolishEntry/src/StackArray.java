@@ -11,7 +11,7 @@ public class StackArray<E> implements MyStack<E> {
 
     @Override
     public void push(E e) {//Помещает элемент в верхнюю часть этой стопки.
-        arr = Arrays.copyOf(arr, arr.length + 1);
+        arr = Arrays.copyOf(arr, arr.length + 1);//добавить увеличение размера
         arr[arr.length - 1] = e;
     }
 
@@ -25,7 +25,7 @@ public class StackArray<E> implements MyStack<E> {
     @Override
     public E peek() {//Смотрит на объект вверху этого стека, не удаляя его из стека.
         if (arr.length == 0)
-            throw new NoSuchElementException();
+            return null;//throw new NoSuchElementException();
         E e = arr[arr.length - 1];
         return e;
     }

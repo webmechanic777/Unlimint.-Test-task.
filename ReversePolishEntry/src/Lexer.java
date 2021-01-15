@@ -1,3 +1,4 @@
+import static java.lang.Double.parseDouble;
 
 public class Lexer {
     private final String expression;
@@ -7,11 +8,11 @@ public class Lexer {
         this.expression = expression;
     }
 
-    public Lexem getNextToken() throws EnumConstantNotPresentException {//получить лексему, переключает currentPosition
+    public Lexem getNextToken() {//получить лексему, переключает currentPosition
         return accomplishment();
     }
 
-    public Lexem lookAhead() throws EnumConstantNotPresentException {//посмотреть следующую лексему, не переключает currentPosition
+    public Lexem lookAhead() {//посмотреть следующую лексему, не переключает currentPosition
         int IncrementOff = currentPosition;
         Lexem lexem = accomplishment();
         currentPosition = IncrementOff;
@@ -38,7 +39,7 @@ public class Lexer {
                 s.append(expression.charAt(currentPosition));
                 currentPosition++;
         }
-        return new Lexem(s.toString(), LexemType.NUMBER);
+        return new Lexem(parseDouble(s.toString()), LexemType.NUMBER);
     }
 
     private Lexem parseNotANumber() {

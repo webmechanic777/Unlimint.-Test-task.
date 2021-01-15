@@ -7,14 +7,16 @@ public class Accomplishment {//выполнение
 //        ReversePolishEntry reversePolishEntry = new ReversePolishEntry("3*2^2");           // 12
 //        ReversePolishEntry reversePolishEntry = new ReversePolishEntry("3^2+2");           // 11
         ReversePolishEntry reversePolishEntry = new ReversePolishEntry("12+22*(3+4/2-(1+2))*2+1");// 101.0
+//        ReversePolishEntry reversePolishEntry = new ReversePolishEntry("10*2+3");// 23
+//        ReversePolishEntry reversePolishEntry = new ReversePolishEntry("10-2+3+2+7+8");// 28
 
         MyStack<Lexem> stackLexem =  reversePolishEntry.getReversePolishEntry();//Получить польскую запись.
-        System.out.println(stackLexem);     //[12, 22, 3, 4, 2, /, 1, 2, +, -, +, *, 2, *, 1, +, +]
 
-        Calculate recordingSolution = new Calculate(stackLexem);//записывающее решение
-        String answer = recordingSolution.getAnswer();//ответ
+        System.out.println(stackLexem);//   [12, 22, 3, 4, 2, /, +, 1, 2, +, -, *, 2, *, +, 1, +]
+
+        Calculate calculate = new Calculate(stackLexem);//записывающее решение
+        String answer = calculate.getAnswer();//ответ
         System.out.println(answer);
-
     }
 }
 

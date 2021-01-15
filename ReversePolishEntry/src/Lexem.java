@@ -1,6 +1,7 @@
 
-public class Lexem<LexemType> {//возвращается Lexem типы разные value,
-    private String value;
+public class Lexem {//возвращается Lexem типы разные value,
+    private String value = "";
+    private double doubleValue;
     private LexemType type;//Enumeration
 
     public Lexem(String value, LexemType type) {
@@ -8,8 +9,17 @@ public class Lexem<LexemType> {//возвращается Lexem типы раз�
         this.type = type;
     }
 
+    public Lexem(double doubleValue, LexemType type) {
+        this.doubleValue = doubleValue;
+        this.type = type;
+    }
+
     public LexemType getLexemType() {
         return type;
+    }
+
+    public double getDoubleValue() {
+        return doubleValue;
     }
 
     public String getValue() {
@@ -17,6 +27,9 @@ public class Lexem<LexemType> {//возвращается Lexem типы раз�
     }
 
     public String toString() {
+        if (value.equals("")) {
+            return String.valueOf(doubleValue);
+        }
         return value;
     }
 }

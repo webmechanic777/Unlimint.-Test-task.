@@ -1,52 +1,54 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class Calculate {
-    private List<Lexem> list = new ArrayList<>();
-    private int x = -1;
-    private double result = 0;
+    private MyStack<Lexem> stack = new StackArray<>(Lexem.class);;
+    private MyStack<Lexem> answer = new StackArray<>(Lexem.class);;
+    private double a = 0;
+    private double b = 0;
 
     public Calculate(MyStack<Lexem> stackLexem) {
         while (stackLexem.size() != 0) {
-            list.add(stackLexem.pop());
+            stack.push(stackLexem.pop());
         }
-        Collections.reverse(list);
     }
 
     public String getAnswer() {
-        while (list.size() != 1) {
-            x++;
-            switch ((LexemType) list.get(x).getLexemType()) {
+        while (!(answer.size() == 1 && stack.size() == 0)) {
+            switch (stack.peek().getLexemType()) {
+                case NUMBER:
+                    answer.push(stack.pop());
+                    continue;
                 case PLUS:
-                    result = Double.parseDouble((list.get(x-2).toString())) + Double.parseDouble((list.get(x-1).toString()));
-                    calculate();
+                    initializationAB();
+                    answer.push(new Lexem(a + b, LexemType.NUMBER));
+                    stack.pop();
                     continue;
                 case MINUS:
-                    result = Double.parseDouble((list.get(x-2).toString())) - Double.parseDouble((list.get(x-1).toString()));
-                    calculate();
+                    initializationAB();
+                    answer.push(new Lexem(a - b, LexemType.NUMBER));
+                    stack.pop();
                     continue;
                 case MULTIPLY:
-                    result = Double.parseDouble((list.get(x-2).toString())) * Double.parseDouble((list.get(x-1).toString()));
-                    calculate();
+                    initializationAB();
+                    answer.push(new Lexem(a * b, LexemType.NUMBER));
+                    stack.pop();
                     continue;
                 case DIVISION:
-                    result = Double.parseDouble((list.get(x-2).toString())) / Double.parseDouble((list.get(x-1).toString()));
-                    calculate();
+                    initializationAB();
+                    answer.push(new Lexem(a / b, LexemType.NUMBER));
+                    stack.pop();
                     continue;
                 case DEGREE:
-                    result = Math.pow(Double.parseDouble((list.get(x-2).toString())), Double.parseDouble((list.get(x-1).toString())));
-                    calculate();
+                    initializationAB();
+                    answer.push(new Lexem(Math.pow(b, a), LexemType.NUMBER));
+                    stack.pop();
                     continue;
             }
         }
-        return list.get(0).toString();
+        return answer.peek().toString();
     }
 
-    private void calculate() {
-        list.set(x-2, new Lexem(String.valueOf(result), LexemType.NUMBER));
-        list.remove(x);
-        list.remove(x-1);
-        x = x - 2;
+    private void initializationAB() {
+        b = answer.pop().getDoubleValue();
+        a = answer.pop().getDoubleValue();
     }
 }

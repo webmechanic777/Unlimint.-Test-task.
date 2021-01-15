@@ -10,24 +10,24 @@ public class ReversePolishEntry {
 
     public MyStack<Lexem> getReversePolishEntry() {//Получение польской записи.
          while (!lexer.lookAhead().getLexemType().equals(LexemType.EOF)) {
-             switch ((LexemType) lexer.lookAhead().getLexemType()) {
+             switch (lexer.lookAhead().getLexemType()) {
                  case NUMBER:
                      numbers.push(lexer.getNextToken());
                      continue;
                  case PLUS:
-                     calculatePlus();
-                     continue;
                  case MINUS:
+                     parseExpression(2);
+                     continue;
                  case DIVISION:
                  case MULTIPLY:
-                     calculateMultiply();
+                     parseExpression(3);
                      continue;
                  case DEGREE:
                  case LEFT_BRACKET:
                      symbols.push(lexer.getNextToken());
                      continue;
                  case RIGHT_BRACKET:
-                     calculateRightBracket();
+                     parseRightBracket();
              }
          }
          while (symbols.size() != 0)
@@ -35,27 +35,14 @@ public class ReversePolishEntry {
          return numbers;
     }
 
-    private void calculateMultiply() {
-        if (symbols.size() != 0 &&
-                symbols.peek().getLexemType() == LexemType.MULTIPLY ||
-                symbols.peek().getLexemType() == LexemType.DIVISION) {
+    private void parseExpression(int priority) {
+        while (symbols.size() != 0 && symbols.peek().getLexemType().getPriority() > priority) {
             numbers.push(symbols.pop());
         }
         symbols.push(lexer.getNextToken());
     }
 
-    public void calculatePlus() {
-        if (symbols.size() != 0) {
-            if (symbols.peek().getLexemType() == LexemType.MULTIPLY ||
-                    symbols.peek().getLexemType() == LexemType.DIVISION ||
-                    symbols.peek().getLexemType() == LexemType.DEGREE) {
-                numbers.push(symbols.pop());
-            }
-        }
-        symbols.push(lexer.getNextToken());
-    }
-
-    public void calculateRightBracket() {
+    private void parseRightBracket() {
         while (symbols.peek().getLexemType() != LexemType.LEFT_BRACKET) {
             numbers.push(symbols.pop());
         }
