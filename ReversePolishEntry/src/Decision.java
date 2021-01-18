@@ -1,17 +1,17 @@
 
-public class Calculate {
+public class Decision {
     private MyStack<Lexem> stack = new StackArray<>(Lexem.class);;
     private MyStack<Lexem> answer = new StackArray<>(Lexem.class);;
     private double a = 0;
     private double b = 0;
 
-    public Calculate(MyStack<Lexem> stackLexem) {
+    public Decision(MyStack<Lexem> stackLexem) {
         while (stackLexem.size() != 0) {
             stack.push(stackLexem.pop());
         }
     }
 
-    public String getAnswer() {
+    public String calculate() {
         while (!(answer.size() == 1 && stack.size() == 0)) {
             switch (stack.peek().getLexemType()) {
                 case NUMBER:

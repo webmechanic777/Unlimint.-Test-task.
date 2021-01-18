@@ -18,7 +18,6 @@ public class Lexer {
         currentPosition = IncrementOff;
         return lexem;
     }
-
     private Lexem accomplishment() {
         Lexem lexem = new Lexem("", LexemType.EOF);
         if (currentPosition < expression.length()) {

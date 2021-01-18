@@ -1,8 +1,8 @@
 
 public class ReversePolishEntry {
-    private static MyStack<Lexem> numbers = new StackArray<>(Lexem.class);//для чисел
-    private static MyStack<Lexem> symbols = new StackArray<>(Lexem.class);//для знаков
-    private static Lexer lexer;
+    private MyStack<Lexem> numbers = new StackArray<>(Lexem.class);//для чисел
+    private MyStack<Lexem> symbols = new StackArray<>(Lexem.class);//для знаков
+    private Lexer lexer;
 
     public ReversePolishEntry(String string) {
         lexer = new Lexer(string);
@@ -50,3 +50,4 @@ public class ReversePolishEntry {
         symbols.pop();
     }
 }
+
