@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/EmailFiniteStateMachine.iml" filepath="$PROJECT_DIR$/EmailFiniteStateMachine.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ReversePolishEntry.iml" filepath="$PROJECT_DIR$/ReversePolishEntry.iml" />
     </modules>
   </component>
 </project>
