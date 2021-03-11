@@ -8,40 +8,38 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.BlockingQueue;
 
 @Component
-public class Converter implements Runnable {
-//    @Autowired
-//    private BlockingQueue<OrderEntry> ordersQueue;
+public class Converter {
+    private BlockingQueue<OrderEntry> ordersQueue;
     private Printer printer;
 
-//    @Autowired
-//    public Converter(BlockingQueue<OrderEntry> ordersQueue, Printer printer) {
-//        this.ordersQueue = ordersQueue;
-//        this.printer = printer;
-//    }
-
-    public void convert(OrderEntry orderEntry) {//дол
-//        String inPrint = "{\"orderId\":" + orderEntry.getOrder().getOrderId() +
-//                ", \"amount\":" + orderEntry.getOrder().getAmount() +
-//                ", \"currency\":\"" + orderEntry.getOrder().getOrderId() +
-//                "\" ,\"comment\":\"" + orderEntry.getOrder().getComment() +
-//                ", \"filename\":\"" + orderEntry.getFilename() +
-//                "\", \"line\":" + orderEntry.getLine() +
-//                "\", \"result\":\"" + orderEntry.getResult() + "\" }";
-//        printer.printOrderEntry(inPrint);
+    @Autowired
+    public Converter(@Qualifier("getOrdersQueue") BlockingQueue<OrderEntry> ordersQueue, Printer printer) {
+        this.ordersQueue = ordersQueue;
+        this.printer = printer;
     }
 
-    @Override
-    public void run() {
-    //читать из очереди, как-то остановить ожидание
+    public void runConverter() {
+        try {
+            while (true) convert(ordersQueue.take());
+        } catch (InterruptedException e) {
+            System.out.println("Исключение в Converter");
+            e.printStackTrace();
+        }
 
-//        try {
-//            while (true)
-//                convert(ordersQueue.take());
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+
 //take() ожидает головного элемента очереди и удаляет его. Если очередь пуста,
 // она блокируется и ожидает, пока элемент станет доступным.
+    }
+
+    public void convert(OrderEntry orderEntry) {//дол
+        String inPrint = "{\"orderId\":" + orderEntry.getOrder().getOrderId() +
+                ", \"amount\":" + orderEntry.getOrder().getAmount() +
+                ", \"currency\":\"" + orderEntry.getOrder().getOrderId() +
+                "\" ,\"comment\":\"" + orderEntry.getOrder().getComment() +
+                ", \"filename\":\"" + orderEntry.getFilename() +
+                "\", \"line\":" + orderEntry.getLine() +
+                "\", \"result\":\"" + orderEntry.getResult() + "\" }";
+        printer.printOrderEntry(inPrint);
     }
 }
 

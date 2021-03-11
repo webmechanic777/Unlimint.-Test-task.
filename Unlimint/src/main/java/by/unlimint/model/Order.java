@@ -6,12 +6,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
-@Component
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Order {
     private int orderId;
     private double amount;

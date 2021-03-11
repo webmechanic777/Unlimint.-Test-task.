@@ -17,41 +17,40 @@ import java.util.concurrent.BlockingQueue;
 @Component
 @Scope("prototype")
 public class JsonProducer implements OrderEntryProducer {
-//    private BlockingQueue<OrderEntry> ordersQueue;
+    private BlockingQueue<OrderEntry> ordersQueue;
     private String type = "jsonl";
-//    private Gson gson;
-//
-//    @Autowired
-//    public JsonProducer(BlockingQueue<OrderEntry> ordersQueue, Gson gson) {
-//        this.ordersQueue = ordersQueue;
-//        this.gson = gson;
-//    }
+    private Gson gson;
+
+    @Autowired
+    public JsonProducer(BlockingQueue<OrderEntry> ordersQueue, Gson gson) {
+        this.ordersQueue = ordersQueue;
+        this.gson = gson;
+    }
 
 
     @Override
     public void readOrders(File file) {
-//        try (BufferedReader in = new BufferedReader(new FileReader(file))){
-//            int lineCount = 0;
-//            OrderEntry orderEntry = new OrderEntry();
-//            String nextLine;
-//            while ((nextLine = in.readLine()) != null) {
-//                try {
-//                    Order order = gson.fromJson(nextLine, Order.class);
-////                    System.out.println(order.toString());
-//                    orderEntry.setResult("OK");
-//                    orderEntry.setOrder(order);
-//                    orderEntry.setFilename(file.getName());
-//                    orderEntry.setLine(lineCount++);
-//                    ordersQueue.put(orderEntry);
-//                } catch (Exception e) {
-//                    orderEntry.setResult(e.toString());
-//                }
-////offer() возвращает true, если вставка прошла успешно, иначе false.
-//            }
-//        } catch (IOException e) {
-//            System.out.println("Не удалось открыть файл.");
-//            e.printStackTrace();
-//        }
+        try (BufferedReader in = new BufferedReader(new FileReader(file))){
+            int lineCount = 0;
+            String nextLine;
+            while ((nextLine = in.readLine()) != null) {
+                OrderEntry orderEntry = new OrderEntry();
+                try {
+                    Order order = gson.fromJson(nextLine, Order.class);
+                    orderEntry.setResult("OK");
+                    orderEntry.setOrder(order);
+                    orderEntry.setFilename(file.getName());
+                    orderEntry.setLine(lineCount++);
+                    ordersQueue.put(orderEntry);
+                } catch (Exception e) {
+                    orderEntry.setResult(e.toString());
+                }
+//offer() возвращает true, если вставка прошла успешно, иначе false.
+            }
+        } catch (IOException e) {
+            System.out.println("Не удалось открыть файл.");
+            e.printStackTrace();
+        }
 
     }
 
