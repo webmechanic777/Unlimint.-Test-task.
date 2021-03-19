@@ -5,5 +5,4 @@ import java.io.File;
 public interface OrderEntryProducer {
     void readOrders(File file);
     String getType();
-//сделать абстракт класс
 }

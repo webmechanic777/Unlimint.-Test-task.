@@ -3,10 +3,9 @@ package by.unlimint.service.implProducer;
 import by.unlimint.model.Order;
 import by.unlimint.model.OrderEntry;
 import by.unlimint.service.OrderEntryProducer;
+import by.unlimint.service.ValidatorData;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,48 +14,49 @@ import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 
 @Component
-@Scope("prototype")
 public class JsonProducer implements OrderEntryProducer {
-    private BlockingQueue<OrderEntry> ordersQueue;
     private String type = "jsonl";
+    private BlockingQueue<OrderEntry> ordersQueue;
     private Gson gson;
+    private ValidatorData validatorData;
 
     @Autowired
-    public JsonProducer(BlockingQueue<OrderEntry> ordersQueue, Gson gson) {
+    public JsonProducer(BlockingQueue<OrderEntry> ordersQueue, Gson gson, ValidatorData validatorData) {
         this.ordersQueue = ordersQueue;
         this.gson = gson;
+        this.validatorData = validatorData;
     }
-
 
     @Override
     public void readOrders(File file) {
-        try (BufferedReader in = new BufferedReader(new FileReader(file))){
-            int lineCount = 0;
+        try (BufferedReader in = new BufferedReader(new FileReader(file))) {
+            int lineCount = 1;
             String nextLine;
             while ((nextLine = in.readLine()) != null) {
+                Order order = new Order();
                 OrderEntry orderEntry = new OrderEntry();
                 try {
-                    Order order = gson.fromJson(nextLine, Order.class);
-                    orderEntry.setResult("OK");
-                    orderEntry.setOrder(order);
-                    orderEntry.setFilename(file.getName());
-                    orderEntry.setLine(lineCount++);
-                    ordersQueue.put(orderEntry);
+                    order = gson.fromJson(nextLine, Order.class);
+                    orderEntry = validatorData.validate(order, orderEntry);
                 } catch (Exception e) {
-                    orderEntry.setResult(e.toString());
+                    orderEntry.setErrors("Не коректная строка!");
                 }
-//offer() возвращает true, если вставка прошла успешно, иначе false.
+                orderEntry.setLine(lineCount);
+                orderEntry.setFilename(file.getName());
+                try {
+                    ordersQueue.put(orderEntry);
+                } catch (InterruptedException e) {
+                    System.err.println("Не удалось положить в очередь строку № " + lineCount);
+                }
+                lineCount++;
             }
         } catch (IOException e) {
-            System.out.println("Не удалось открыть файл.");
-            e.printStackTrace();
+            System.err.println("Не удается найти указанный файл: " + file.toString());
         }
-
     }
 
     public String getType() {
         return type;
     }
 }
-
 

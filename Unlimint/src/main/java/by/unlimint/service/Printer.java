@@ -1,7 +1,7 @@
 package by.unlimint.service;
 
-import by.unlimint.model.OrderEntry;
+import by.unlimint.model.ConversionResult;
 
 public interface Printer {
-    void printOrderEntry(String... inPrint);
+    void printConsole(ConversionResult conversionResult);
 }

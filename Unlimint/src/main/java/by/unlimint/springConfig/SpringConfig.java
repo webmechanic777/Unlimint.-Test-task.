@@ -6,7 +6,6 @@ import com.google.gson.Gson;;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -34,5 +33,4 @@ public class SpringConfig {
     public Map<String, OrderEntryProducer> orderEntryProducers() {
         return orderEntryProducers.stream().collect(Collectors.toMap(OrderEntryProducer::getType, Function.identity()));
     }
-
 }

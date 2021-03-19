@@ -3,6 +3,7 @@ package by.unlimint.service.implProducer;
 import by.unlimint.model.Order;
 import by.unlimint.model.OrderEntry;
 import by.unlimint.service.OrderEntryProducer;
+import by.unlimint.service.ValidatorData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -13,41 +14,44 @@ import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 
 @Component
-public class CSVProducer implements OrderEntryProducer {//Производитель
+public class CSVProducer implements OrderEntryProducer {
 
     private BlockingQueue<OrderEntry> ordersQueue;
     private String type = "csv";
+    private ValidatorData validatorData;
 
     @Autowired
-    public CSVProducer(@Qualifier("getOrdersQueue") BlockingQueue<OrderEntry> ordersQueue) {
+    public CSVProducer(@Qualifier("getOrdersQueue") BlockingQueue<OrderEntry> ordersQueue, ValidatorData validatorData) {
         this.ordersQueue = ordersQueue;
+        this.validatorData = validatorData;
     }
 
     @Override
     public void readOrders(File file) {
-        try (BufferedReader in = new BufferedReader(new FileReader(file))){
-            int lineCount = 0;
-            String[] arrStr = null;
+        try (BufferedReader in = new BufferedReader(new FileReader(file))) {
+            int lineCount = 1;
             String nextLine;
             while ((nextLine = in.readLine()) != null) {
                 OrderEntry orderEntry = new OrderEntry();
                 try {
-                    arrStr = nextLine.split(",");
-                    Order order = new Order(Integer.parseInt(arrStr[0]), Double.parseDouble(arrStr[1]), arrStr[2], arrStr[3]);
-                    orderEntry.setResult("ОК");
+                    String[] arrStr = nextLine.split(",");
+                    Order order = new Order((arrStr[0]), (arrStr[1]), arrStr[2], arrStr[3]);
+                    orderEntry = validatorData.validate(order, orderEntry);
                     orderEntry.setOrder(order);
-                    orderEntry.setFilename(file.getName());
-                    orderEntry.setLine(lineCount++);
-                    ordersQueue.put(orderEntry);
                 } catch (Exception e) {
-                    orderEntry.setResult(e.toString());
+                    orderEntry.setErrors("Не коректная строка!");
                 }
-//offer() возвращает true, если вставка прошла успешно, иначе false.
+                orderEntry.setLine(lineCount);
+                orderEntry.setFilename(file.getName());
+                try {
+                    ordersQueue.put(orderEntry);
+                } catch (InterruptedException e) {
+                    System.err.println("Не удалось положить в очередь строку № " + lineCount);
+                }
+                lineCount++;
             }
-            OrderEntry orderEntry = new OrderEntry();
         } catch (IOException e) {
-            System.out.println("Не удалось открыть файл.");
-            e.printStackTrace();
+            System.err.println("Не удается найти указанный файл: " + file.toString());
         }
     }
 

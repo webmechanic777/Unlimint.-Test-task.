@@ -11,18 +11,10 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Order {
-    private int orderId;
-    private double amount;
+    private String orderId;
+    private String amount;
     private String currency;
     private String comment;
-
-    @Override
-    public String toString() {
-        return "Order{" +
-                "orderId=" + orderId +
-                ", amount=" + amount +
-                ", currency='" + currency + '\'' +
-                ", comment='" + comment + '\'' +
-                '}';
-    }
 }
+
+

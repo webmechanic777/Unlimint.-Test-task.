@@ -10,60 +10,89 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
 @SpringBootApplication
 public class UnlimintApplication implements CommandLineRunner {
 
-	@Value("${UnlimintApplication.numberOfProducerThreads}")
-	private int numberOfProducerThreads;
-	@Value("${UnlimintApplication.numberOfConverterThreads}")
-	private int numberOfConverterThreads;
-
-	private Map<String, OrderEntryProducer> orderEntryProducers;//Producer Consumer baeldun
+	private Map<String, OrderEntryProducer> orderEntryProducers;
 	private BlockingQueue<OrderEntry> ordersQueue;
     private PathParser pathParser;
     private Converter converter;
-	private CountDownLatch countDownLatchProducer = new CountDownLatch(numberOfProducerThreads);
-	private ExecutorService exSerProducer = Executors.newFixedThreadPool(numberOfProducerThreads);
-	private ExecutorService exSerConverter = Executors.newFixedThreadPool(numberOfConverterThreads);
+    private int numberOfProducerThreads;
+    private int numberOfConverterThreads;
+	private ExecutorService exSerProducer;
+	private ExecutorService exSerConverter;
 
 	@Autowired
-	public UnlimintApplication(@Qualifier("orderEntryProducers") Map<String, OrderEntryProducer> orderEntryProducers,
+	public UnlimintApplication(@Value("${UnlimintApplication.numberOfProducerThreads}") int numberOfProducerThreads,
+                               @Value("${UnlimintApplication.numberOfConverterThreads}") int numberOfConverterThreads,
+							   @Qualifier("orderEntryProducers") Map<String, OrderEntryProducer> orderEntryProducers,
 							   @Qualifier("getOrdersQueue") BlockingQueue<OrderEntry> ordersQueue,
 							   PathParser pathParser,
 							   Converter converter) {
-//		this.countDownLatchProducer = new CountDownLatch(numberOfProducerThreads);
-//		this.exSerProducer = Executors.newFixedThreadPool(numberOfProducerThreads);
-//		this.exSerConverter = Executors.newFixedThreadPool(numberOfConverterThreads);
 		this.orderEntryProducers = orderEntryProducers;
+		this.ordersQueue = ordersQueue;
 		this.pathParser = pathParser;
 		this.converter = converter;
-		this.ordersQueue = ordersQueue;
+		this.numberOfProducerThreads = numberOfProducerThreads;
+		this.numberOfConverterThreads = numberOfConverterThreads;
+		this.exSerProducer = Executors.newFixedThreadPool(numberOfProducerThreads);
+		this.exSerConverter = Executors.newFixedThreadPool(numberOfConverterThreads);
 	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(UnlimintApplication.class, args);
 	}
 
-	@Override//Метод вызывается после создания бинов.
-	public void run(String... args) throws Exception {
-		exSerConverter.execute(() -> {converter.runConverter();});
+	@Override
+	public void run(String[] args) throws Exception {
+		List<File> argsApplication = checkPath(args);
+		runConsumer();
+		runProducers(argsApplication);
 
-		for (String arg : args) {
+	}
+
+	private List<File> checkPath(String[] args) {
+		List<File> filePaths = new ArrayList<>();
+		for (int i = 0; i < args.length; i++) {
+			File file = new File(args[i]);
+			if (file.exists()) {
+				filePaths.add(file);
+			} else {
+				System.out.println("Не найден Файл с именем " + args[i]);
+			}
+		}
+		return filePaths;
+	}
+
+	private void runConsumer() {
+		for (int i = 0; i < numberOfConverterThreads; i++) {
+			exSerConverter.execute(converter);
+		}
+	}
+
+	private void runProducers(List<File> argsApplication) {
+		CountDownLatch countDownLatchProducer = new CountDownLatch(argsApplication.size());
+		for (File arg : argsApplication) {
 			exSerProducer.execute(() -> {
-				orderEntryProducers.get(pathParser.getTheFileExtensionFromThePath(arg)).readOrders(new File(arg));
+				orderEntryProducers.get(pathParser.getTheFileExtensionFromThePath(arg)).readOrders(arg);
 				countDownLatchProducer.countDown();
 			});
 		}
-		countDownLatchProducer.await();
+		try {
+			countDownLatchProducer.await();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		stopExecutorService(exSerProducer);
-		while (!ordersQueue.isEmpty()) {}//Ждём пока очередь не опустеет.
+		while (!ordersQueue.isEmpty()) {}
 		stopExecutorService(exSerConverter);
-
 	}
 
 	private void stopExecutorService(ExecutorService executorService) {
@@ -77,7 +106,4 @@ public class UnlimintApplication implements CommandLineRunner {
 		}
 	}
 }
-//Теория выключения с таблеткой: при опустении считываемого списка JsonProducer продолжает выпускать OrderEntry
-//но поле stopMessage = false а не true (<- таблетка). Считывающие потоки закрываются из-за этой таблетки и когда
-//закроются все то сработает CountDownLatch.await() и мы отдадим приказ executorService.shutdownNow().
-//Сергей но это просто множество кода в котором нет никакой нужды.
+

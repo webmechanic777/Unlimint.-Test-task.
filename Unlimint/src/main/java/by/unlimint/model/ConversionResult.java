@@ -9,9 +9,12 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderEntry {
-    private Order order;
+public class ConversionResult {
+    private String Id;
+    private String amount;
+    private String comment;
     private String filename;
     private int line;
-    private String errors;
+    private String result;//errors;
 }
+
