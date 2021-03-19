@@ -78,20 +78,30 @@ public class UnlimintApplication implements CommandLineRunner {
 	}
 
 	private void runProducers(List<File> argsApplication) {
-		CountDownLatch countDownLatchProducer = new CountDownLatch(argsApplication.size());
-		for (File arg : argsApplication) {
-			exSerProducer.execute(() -> {
-				orderEntryProducers.get(pathParser.getTheFileExtensionFromThePath(arg)).readOrders(arg);
-				countDownLatchProducer.countDown();
-			});
+		for (int i = 0; i < argsApplication.size(); i++) {
+			boolean b = orderEntryProducers.containsKey(pathParser.getTheFileExtensionFromThePath(argsApplication.get(i)));
+			if (!orderEntryProducers.containsKey(pathParser.getTheFileExtensionFromThePath(argsApplication.get(i)))) {
+				System.out.println("Не найден класс обработчик к файлу с расширением: " + pathParser.getTheFileExtensionFromThePath(argsApplication.get(i)));
+				argsApplication.remove(argsApplication.get(i));
+			}
 		}
-		try {
-			countDownLatchProducer.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+
+		if (!argsApplication.isEmpty()) {
+			CountDownLatch countDownLatchProducer = new CountDownLatch(argsApplication.size());
+			for (File arg : argsApplication) {
+				exSerProducer.execute(() -> {
+					orderEntryProducers.get(pathParser.getTheFileExtensionFromThePath(arg)).readOrders(arg);
+					countDownLatchProducer.countDown();
+				});
+			}
+			try {
+				countDownLatchProducer.await();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			stopExecutorService(exSerProducer);
+			while (!ordersQueue.isEmpty()) {}
 		}
-		stopExecutorService(exSerProducer);
-		while (!ordersQueue.isEmpty()) {}
 		stopExecutorService(exSerConverter);
 	}
 

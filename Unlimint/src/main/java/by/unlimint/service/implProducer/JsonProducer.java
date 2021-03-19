@@ -51,7 +51,7 @@ public class JsonProducer implements OrderEntryProducer {
                 lineCount++;
             }
         } catch (IOException e) {
-            System.err.println("Не удается найти указанный файл: " + file.toString());
+            System.err.println("Не удается найти указанный файл: " + file.toString() + ". Проверьте верность пути.");
         }
     }
 
